@@ -1,0 +1,12 @@
+{
+    "core":{
+        "background": "#121212"
+    },
+    "tabs": "#424242",
+    "notebook": "#232323",
+    "lists": "#363636",
+    "text":{
+        "background": "#545454",
+        "text": "#ffffff"
+    }
+}
