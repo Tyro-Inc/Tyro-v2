@@ -1,6 +1,7 @@
 import tkinter as tk
 from tkinter import ttk
 import json
+from objects import *
 
 
 class App:
@@ -145,7 +146,17 @@ class App:
         self.propertiesFrame.place(relx=0.85, rely=0.01, relwidth=0.15, relheight=0.98)
         self.PropertiesLabel = ttk.Label(self.propertiesFrame, text="Properties")
         self.PropertiesLabel.place(x=0, y=0, width=100, height=20)
-
+        objs = [
+            CanvasObject(id="69420", name="Test", x=0, y=0, width=100, height=100, scale=1, type="rectangle", fill="#010101"),
+            CanvasObject(id="69420", name="Test", x=100, y=0, width=100, height=100, scale=1, type="ellipse", fill="#010101"),
+            CanvasObject(id="69420", name="Test", x=0, y=100, width=100, height=100, scale=1, type="line", fill="#010101"),
+            CanvasObject(id="69420", name="Test", x=0, y=200, width=100, height=100, scale=1, type="image", path="assets/server.png", root=root),
+            CanvasObject(id="69420", name="Test", x=100, y=100, type="text", fill="#010101", text="Hello World", font="Consolas", fontSize=20),
+            ]
+        for i in objs:
+            i.draw(self.canvas)
+        # rect.draw(self.canvas)
+        
 
 if __name__ == "__main__":
     root = tk.Tk()
