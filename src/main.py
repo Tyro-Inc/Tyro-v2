@@ -2,7 +2,13 @@ import tkinter as tk
 from tkinter import ttk
 import json
 from objects import *
-
+from tkinter import filedialog, colorchooser, font, messagebox
+import random
+import json
+import shutil
+from time import sleep
+import sys
+import os
 
 class App:
     def __init__(self, root):
@@ -146,17 +152,110 @@ class App:
         self.propertiesFrame.place(relx=0.85, rely=0.01, relwidth=0.15, relheight=0.98)
         self.PropertiesLabel = ttk.Label(self.propertiesFrame, text="Properties")
         self.PropertiesLabel.place(x=0, y=0, width=100, height=20)
-        objs = [
-            CanvasObject(id="69420", name="Test", x=0, y=0, width=100, height=100, scale=1, type="rectangle", fill="#010101"),
-            CanvasObject(id="69420", name="Test", x=100, y=0, width=100, height=100, scale=1, type="ellipse", fill="#010101"),
-            CanvasObject(id="69420", name="Test", x=0, y=100, width=100, height=100, scale=1, type="line", fill="#010101"),
-            CanvasObject(id="69420", name="Test", x=0, y=200, width=100, height=100, scale=1, type="image", path="assets/server.png", root=root),
-            CanvasObject(id="69420", name="Test", x=100, y=100, type="text", fill="#010101", text="Hello World", font="Consolas", fontSize=20),
-            ]
-        for i in objs:
-            i.draw(self.canvas)
-        # rect.draw(self.canvas)
         
+        # Initialize the Menu bar
+        self.menu = tk.Menu(root)
+        root.config(menu=self.menu)
+
+        self.addobjectmenu = tk.Menu(self.menu)
+        self.filemenu = tk.Menu(self.menu)
+
+        self.menu.add_cascade(label="File", menu=self.filemenu)
+        self.menu.add_cascade(label="Add Object", menu=self.addobjectmenu)
+
+        self.addobjectmenu.add_command(
+            label="Image", command=lambda: self.addImage(""), accelerator="Ctrl+I")
+        self.addobjectmenu.add_command(
+            label="Rectangle", command=lambda: self.addRectangle(""), accelerator="Ctrl+R")
+        self.addobjectmenu.add_command(
+            label="Ellipse", command=lambda: self.addEllipse(""), accelerator="Ctrl+E")
+        self.addobjectmenu.add_command(
+            label="Line", command=lambda: self.addLine(""), accelerator="Ctrl+L")
+        self.addobjectmenu.add_command(
+            label="Text", command=lambda: self.addText(""), accelerator="Ctrl+T")
+
+        self.root.bind("<Control-i>", self.addImage)
+        self.root.bind("<Control-r>", self.addRectangle)
+        self.root.bind("<Control-e>", self.addEllipse)
+        self.root.bind("<Control-l>", self.addLine)
+        self.root.bind("<Control-t>", self.addText)
+        self.objects = {}
+        
+        
+    def addImage(self, arg):
+        """
+        Ask the user to select an image and then adds it to the project
+        """
+        image = filedialog.askopenfilename(
+            initialdir="/",
+            title="Select file",
+            filetypes=(("png files", "*.png"), ("all files", "*.*")),
+        )
+        if image != "":
+            ID = str(random.randint(1000, 10000))
+            imgname = image.split("/")[-1]
+            imgname = f"{imgname.split('.')[0]}_{ID}"
+            self.objects[imgname] = CanvasObject(id=ID, name=imgname, path=image, type="image", x=0, y=0, scale=1, 
+                                                    width=100, height=100, canvas=self.canvas)
+            self.root.image = self.objects[imgname].image
+            self.objects[imgname].draw()
+
+    def addRectangle(self, arg):
+        """
+        Creates a new rectangle object and adds it to the project
+        """
+        ID = str(random.randint(1000, 10000))
+        self.objects["rectangle_" + str(ID)] = CanvasObject(id=ID, name="rectangle_" + str(ID), canvas=self.canvas, 
+                                                            x=0, y=0, width=100, height=100, scale=1, fill="#999999",
+                                                            type="rectangle")
+        self.objects["rectangle_" + str(ID)].draw()
+
+    def addEllipse(self, arg):
+        """
+        Creates a new Ellipse object and adds it to the project
+        """
+        ID = str(random.randint(1000, 10000))
+        self.objects["ellipse_" + str(ID)] = CanvasObject(id=ID, name="ellipse_" + str(ID), canvas=self.canvas, 
+                                                            x=0, y=0, width=100, height=100, scale=1, fill="#999999",
+                                                            type="ellipse")
+        self.objects["ellipse_" + str(ID)].draw()
+
+    def addLine(self, arg):
+        """
+        Creates a new Line object and adds it to the project
+        """
+        ID = str(random.randint(1000, 10000))
+        self.objects["line_" + str(ID)] = CanvasObject(d=ID, name="line_" + str(ID), canvas=self.canvas, 
+                                                            x=0, y=0, width=100, height=100, scale=1, fill="#999999",
+                                                            type="line", thickness=5)
+        self.objects["line_" + str(ID)].draw()
+
+    def addText(self, arg):
+        """
+        Creates a new Text object and adds it to the project
+        """
+        ID = str(random.randint(1000, 10000))
+        self.objects["text_" + str(ID)] = CanvasObject(d=ID, name="text_" + str(ID), canvas=self.canvas, 
+                                                            x=0, y=0, width=100, height=100, scale=1, fill="#999999",
+                                                            type="text", fontSize=18, text="Text", font="Consolas")
+        self.objects["text_" + str(ID)].draw()
+
+    # def deleteObject(self):
+    #     """
+    #     Removes the selected object from self.objects and deletes the tab
+    #     """
+    #     Gameobject = self.objectSelectMenu.get()
+    #     if Gameobject != "":
+    #         Gameobject = self.objects[Gameobject]
+    #         Gameobject.delete()
+    #         del self.objects[Gameobject.name]
+    #         try:
+    #             self.currentObject.set(
+    #                 self.objects[list(self.objects.keys())[0]].name)
+    #         except:
+    #             self.currentObject.set("")
+    #         self.objectSelectMenu["values"] = list(self.objects.keys())
+    #         self.showObjectDetails("")
 
 if __name__ == "__main__":
     root = tk.Tk()
