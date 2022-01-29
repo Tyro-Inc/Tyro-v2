@@ -55,6 +55,7 @@ class App:
             foreground=styles["text"]["text"],
             selectmode=tk.SINGLE,
         )
+        self.objectsList.bind("<<ListboxSelect>>", self.displayProperties)
         self.objectsList.place(x=0, y=0, relwidth=1, relheight=1)
         self.objectsListYScroll = tk.Scrollbar(self.objectsTab, orient=tk.VERTICAL)
         self.objectsListYScroll.place(relx=0.9, rely=0, relheight=1, relwidth=0.1)
@@ -89,10 +90,10 @@ class App:
         self.scenesList.configure(yscrollcommand=self.scenesListYScroll.set)
         self.scenesListYScroll.configure(command=self.scenesList.yview)
 
-        for i in range(1000):
-            self.objectsList.insert(tk.END, "Object " + str(i))
-            self.assetsList.insert(tk.END, "Asset " + str(i))
-            self.scenesList.insert(tk.END, "Scene " + str(i))
+        # for i in range(1000):
+        #     self.objectsList.insert(tk.END, "Object " + str(i))
+        #     self.assetsList.insert(tk.END, "Asset " + str(i))
+        #     self.scenesList.insert(tk.END, "Scene " + str(i))
 
         self.editorTabs = ttk.Notebook(root)
         self.editorTabs.place(relx=0.17, rely=0.01, relwidth=0.67, relheight=0.98)
@@ -199,6 +200,7 @@ class App:
                                                     width=100, height=100, canvas=self.canvas)
             self.root.image = self.objects[imgname].image
             self.objects[imgname].draw()
+            self.objectsList.insert(tk.END, imgname)
 
     def addRectangle(self, arg):
         """
@@ -209,6 +211,7 @@ class App:
                                                             x=0, y=0, width=100, height=100, scale=1, fill="#999999",
                                                             type="rectangle")
         self.objects["rectangle_" + str(ID)].draw()
+        self.objectsList.insert(tk.END, "rectangle_" + str(ID))
 
     def addEllipse(self, arg):
         """
@@ -219,43 +222,55 @@ class App:
                                                             x=0, y=0, width=100, height=100, scale=1, fill="#999999",
                                                             type="ellipse")
         self.objects["ellipse_" + str(ID)].draw()
+        self.objectsList.insert(tk.END, "ellipse_" + str(ID))
 
     def addLine(self, arg):
         """
         Creates a new Line object and adds it to the project
         """
         ID = str(random.randint(1000, 10000))
-        self.objects["line_" + str(ID)] = CanvasObject(d=ID, name="line_" + str(ID), canvas=self.canvas, 
+        self.objects["line_" + str(ID)] = CanvasObject(id=ID, name="line_" + str(ID), canvas=self.canvas, 
                                                             x=0, y=0, width=100, height=100, scale=1, fill="#999999",
                                                             type="line", thickness=5)
         self.objects["line_" + str(ID)].draw()
+        self.objectsList.insert(tk.END, "line_" + str(ID))
 
     def addText(self, arg):
         """
         Creates a new Text object and adds it to the project
         """
         ID = str(random.randint(1000, 10000))
-        self.objects["text_" + str(ID)] = CanvasObject(d=ID, name="text_" + str(ID), canvas=self.canvas, 
+        self.objects["text_" + str(ID)] = CanvasObject(id=ID, name="text_" + str(ID), canvas=self.canvas, 
                                                             x=0, y=0, width=100, height=100, scale=1, fill="#999999",
                                                             type="text", fontSize=18, text="Text", font="Consolas")
         self.objects["text_" + str(ID)].draw()
-
-    # def deleteObject(self):
-    #     """
-    #     Removes the selected object from self.objects and deletes the tab
-    #     """
-    #     Gameobject = self.objectSelectMenu.get()
-    #     if Gameobject != "":
-    #         Gameobject = self.objects[Gameobject]
-    #         Gameobject.delete()
-    #         del self.objects[Gameobject.name]
-    #         try:
-    #             self.currentObject.set(
-    #                 self.objects[list(self.objects.keys())[0]].name)
-    #         except:
-    #             self.currentObject.set("")
-    #         self.objectSelectMenu["values"] = list(self.objects.keys())
-    #         self.showObjectDetails("")
+        self.objectsList.insert(tk.END, "text_" + str(ID))
+    
+    def displayProperties(self, arg):
+        try:
+            currentItem = self.objectsList.get(self.objectsList.curselection())
+            currentItem = self.objects[currentItem].__dict__
+            props = []
+            propElements = {}
+            for key in currentItem.keys():
+                props.append([key, currentItem[key]])
+            y=0.05
+            for item in self.propertiesFrame.winfo_children():
+                item.destroy()
+            for propert, value in props:
+                if propert not in ["canvas", "id", "canvasObject", "type", "image"]:
+                    propElements[propert] = {}
+                    propElements[propert]["label"] = ttk.Label(self.propertiesFrame, text=propert)
+                    propElements[propert]["value"] = tk.StringVar()
+                    propElements[propert]["value"].set(value)
+                    propElements[propert]["entry"] = tk.Entry(self.propertiesFrame, textvariable=propElements[propert]["value"])
+                    propElements[propert]["label"].place(relx=0, rely=y, relwidth=0.5, relheight=0.05)
+                    propElements[propert]["entry"].place(relx=0.5, rely=y, anchor="nw", relwidth=0.5, relheight=0.05)
+                    y+=0.05
+            self.PropertiesLabel = ttk.Label(self.propertiesFrame, text="Properties")
+            self.PropertiesLabel.place(x=0, y=0, width=100, height=20)
+        except Exception as e:
+            print(e)
 
 if __name__ == "__main__":
     root = tk.Tk()

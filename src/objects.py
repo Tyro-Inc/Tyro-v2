@@ -13,6 +13,7 @@ class CanvasObject:
             self.image = img.open(self.path)
             self.image = self.image.resize((int(self.width*self.scale), int(self.height*self.scale)), PIL.Image.ANTIALIAS)
             self.image = ImageTk.PhotoImage(self.image)
+        self.draw()
     
     def moveX(self, x):
         self.x += x
@@ -31,12 +32,16 @@ class CanvasObject:
         
     def draw(self):
         if self.type == "image":
-            self.canvas.create_image(self.x, self.y, image=self.image, anchor="nw")
+            self.canvasObject = self.canvas.create_image(self.x, self.y, image=self.image, anchor="nw")
         elif self.type == "text":
-            self.canvas.create_text(self.x, self.y, text=self.text, font=(self.font, self.fontSize), fill=self.fill, anchor="nw")
+            self.canvasObject = self.canvas.create_text(self.x, self.y, text=self.text, font=(self.font, self.fontSize), fill=self.fill, anchor="nw")
         elif self.type == "rectangle":
-            self.canvas.create_rectangle(self.x, self.y, self.x + self.width, self.y + self.height, fill=self.fill)
+            self.canvasObject = self.canvas.create_rectangle(self.x, self.y, self.x + self.width, self.y + self.height, fill=self.fill)
         elif self.type == "ellipse":
-            self.canvas.create_oval(self.x, self.y, self.x + self.width, self.y + self.height, fill=self.fill)
+            self.canvasObject = self.canvas.create_oval(self.x, self.y, self.x + self.width, self.y + self.height, fill=self.fill)
         elif self.type == "line":
-            self.canvas.create_line(self.x, self.y, self.x + self.width, self.y + self.height, fill=self.fill, width=self.thickness)
+            self.canvasObject = self.canvas.create_line(self.x, self.y, self.x + self.width, self.y + self.height, fill=self.fill, width=self.thickness)
+    
+    def update(self):
+        self.canvas.delete(self.id)
+        self.draw()
