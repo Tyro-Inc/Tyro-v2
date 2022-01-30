@@ -13,7 +13,6 @@ class CanvasObject:
             self.image = img.open(self.path)
             self.image = self.image.resize((int(self.width*self.scale), int(self.height*self.scale)), PIL.Image.ANTIALIAS)
             self.image = ImageTk.PhotoImage(self.image)
-        self.draw()
     
     def moveX(self, x):
         self.x += x
@@ -43,5 +42,6 @@ class CanvasObject:
             self.canvasObject = self.canvas.create_line(self.x, self.y, self.x + self.width, self.y + self.height, fill=self.fill, width=self.thickness)
     
     def update(self):
-        self.canvas.delete(self.id)
+        print(self.name)
+        self.canvas.delete(self.canvasObject)
         self.draw()

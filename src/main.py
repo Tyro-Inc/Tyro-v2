@@ -248,10 +248,11 @@ class App:
     
     def displayProperties(self, arg):
         try:
-            currentItem = self.objectsList.get(self.objectsList.curselection())
+            self.currentItem = self.objectsList.get(self.objectsList.curselection())
+            currentItem = self.currentItem
             currentItem = self.objects[currentItem].__dict__
             props = []
-            propElements = {}
+            self.propElements = {}
             for key in currentItem.keys():
                 props.append([key, currentItem[key]])
             y=0.05
@@ -259,18 +260,42 @@ class App:
                 item.destroy()
             for propert, value in props:
                 if propert not in ["canvas", "id", "canvasObject", "type", "image"]:
-                    propElements[propert] = {}
-                    propElements[propert]["label"] = ttk.Label(self.propertiesFrame, text=propert)
-                    propElements[propert]["value"] = tk.StringVar()
-                    propElements[propert]["value"].set(value)
-                    propElements[propert]["entry"] = tk.Entry(self.propertiesFrame, textvariable=propElements[propert]["value"])
-                    propElements[propert]["label"].place(relx=0, rely=y, relwidth=0.5, relheight=0.05)
-                    propElements[propert]["entry"].place(relx=0.5, rely=y, anchor="nw", relwidth=0.5, relheight=0.05)
+                    self.propElements[propert] = {}
+                    self.propElements[propert]["label"] = ttk.Label(self.propertiesFrame, text=propert)
+                    self.propElements[propert]["value"] = tk.StringVar()
+                    self.propElements[propert]["value"].set(value)
+                    self.propElements[propert]["entry"] = tk.Entry(self.propertiesFrame, textvariable=self.propElements[propert]["value"])
+                    self.propElements[propert]["label"].place(relx=0, rely=y, relwidth=0.5, relheight=0.05)
+                    self.propElements[propert]["entry"].place(relx=0.5, rely=y, anchor="nw", relwidth=0.5, relheight=0.05)
+                    self.propElements[propert]["entry"].bind("<Return>", self.updateObject)
                     y+=0.05
             self.PropertiesLabel = ttk.Label(self.propertiesFrame, text="Properties")
             self.PropertiesLabel.place(x=0, y=0, width=100, height=20)
         except Exception as e:
             print(e)
+            exc_type, exc_obj, exc_tb = sys.exc_info()
+            print(exc_type, exc_tb.tb_lineno)
+    
+    def updateObject(self, arg):
+        try:
+            currentItem = self.currentItem
+            for keys in self.propElements.keys():
+                try:
+                    self.objects[currentItem].__dict__[keys] = int(self.propElements[keys]["value"].get())
+                except:
+                    self.objects[currentItem].__dict__[keys] = self.propElements[keys]["value"].get()
+                self.objects[currentItem].update()
+                GameObject = self.objects[currentItem]
+                del self.objects[currentItem]
+                self.objects[GameObject.name] = GameObject
+                
+                self.objectsList.delete(0, tk.END)
+                for i in self.objects.keys():
+                    self.objectsList.insert(tk.END, i)
+        except Exception as e:
+            print(e)
+            exc_type, exc_obj, exc_tb = sys.exc_info()
+            print(exc_type, exc_tb.tb_lineno)
 
 if __name__ == "__main__":
     root = tk.Tk()
